@@ -96,8 +96,8 @@ function generate_plantuml(tasks)
 
   for (index, task) in enumerate(tasks)
     start_date = isnothing(task.start_date) ? "2024-07-01" : Dates.format(task.start_date, "yyyy-mm-dd")
-    plantuml *= "[$index] as [$(task.name)] starts $start_date and lasts $(task.duration) days\n"
-    plantuml *= "[$index] is $(round(Int, task.completion * 100))% complete\n"
+    plantuml *= "[$(task.name)] as [$(task.name)] starts $start_date and lasts $(task.duration) days\n"
+    plantuml *= "[$(task.name)] is $(round(Int, task.completion * 100))% complete\n"
   end
 
   plantuml *= "@endgantt"
