@@ -44,7 +44,18 @@ function parse_markdown(filename)
       parts = split(task_name, "|")
       task_name = strip(parts[1])
       if length(parts) > 1
-        start_date = Date(strip(parts[2]), "yyyy-mm-dd")
+        date_str = strip(parts[2])
+        if startswith(date_str, "after ")
+          # Handle "after Task" syntax
+          referenced_task_name = strip(date_str[6:end])
+          referenced_task_index = findfirst(t -> !isnothing(t) && t.name == referenced_task_name, tasks)
+          if !isnothing(referenced_task_index)
+            referenced_task = tasks[referenced_task_index]
+            start_date = referenced_task.start_date + Day(referenced_task.duration)
+          end
+        else
+          start_date = Date(date_str, "yyyy-mm-dd")
+        end
       end
       if length(parts) > 2
         duration = parse(Int, strip(parts[3]))
@@ -89,20 +100,38 @@ function parse_markdown(filename)
 end
 
 function generate_plantuml(title, tasks)
+  # Find the earliest start date among the tasks
+  start_dates = [task.start_date for task in tasks if !isnothing(task.start_date) && typeof(task.start_date) != String]
+  project_start_date = isempty(start_dates) ? Dates.today() : Dates.format(minimum(start_dates), "yyyy-mm-dd")
+
   plantuml = """
   @startgantt
   title $title
   printscale daily
-  project starts 2024-07-01
+  project starts $project_start_date
   saturday are closed
   sunday are closed
 
+  <style>
+  ganttDiagram {
+    task {
+      BackGroundColor #66CC66
+    }
+  }
+  </style>
+
   """
 
-  for (index, task) in enumerate(tasks)
-    start_date = isnothing(task.start_date) ? "2024-07-01" : Dates.format(task.start_date, "yyyy-mm-dd")
-    plantuml *= "[$(task.name)] as [$(task.name)] starts $start_date and lasts $(task.duration) days\n"
+  for task in tasks
+    plantuml *= "[$(task.name)] as [$(task.name)] lasts $(task.duration) days\n"
     plantuml *= "[$(task.name)] is $(round(Int, task.completion * 100))% complete\n"
+    if !isnothing(task.start_date) && typeof(task.start_date) == String && startswith(task.start_date, "after ")
+      referenced_task_name = strip(task.start_date)[6:end]
+      plantuml *= "[$(task.name)] starts at [$(referenced_task_name)]'s end\n"
+    else
+      start_date = isnothing(task.start_date) ? project_start_date : Dates.format(task.start_date, "yyyy-mm-dd")
+      plantuml *= "[$(task.name)] starts $start_date\n"
+    end
   end
 
   plantuml *= "@endgantt"

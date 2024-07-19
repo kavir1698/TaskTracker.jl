@@ -17,7 +17,7 @@
   - [ ] Backend
     - [x] Database design
     - [ ] API development
-- [ ] Testing | 2024-08-14 | 7
+- [ ] Testing | after Development | 7
   - [x] Unit tests
   - [ ] Integration tests
   - [ ] User acceptance testing
