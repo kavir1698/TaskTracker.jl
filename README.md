@@ -15,8 +15,10 @@ To use TaskTracker, follow these steps:
    - Tasks can have a start date and duration in days specified in the format `Task name | yyyy-mm-dd | duration`.
 3. Run `julia -e 'using TaskTracker; generate_gantt("todo.md"; output_file="gannt.svg")'` in the terminal, replacing `todo.md` with your todo file name if necessary.
 4. A Gantt chart will be generated as `gantt.svg` in the same directory.
+5. If you have multiple todo files in a directory, you can generate a combined Gantt chart for all of them by running `julia -e 'using TaskTracker; generate_gantt_for_dir("path/to/directory"; output_file="combined_gantt.png")'` in the terminal, replacing `path/to/directory` with your directory path if necessary.
+6. The combined Gantt chart will be generated as `combined_gantt.png` in the same directory.
 ![A Gantt chart created from todo.md](example/gantt.svg)
-5. You can export in the following formats: `pdf`, `png`, `svg`,`xml`, and `plain` (for text)
+7. You can export in the following formats: `pdf`, `png`, `svg`,`xml`, and `plain` (for text). But a combined chart can only be in `png` format.
  
 Example Todo File
 ----------------

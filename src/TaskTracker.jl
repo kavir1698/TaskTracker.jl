@@ -1,9 +1,10 @@
 module TaskTracker
 
-export generate_gantt
+export generate_gantt, generate_gantt_for_dir
 
 using Dates
 using Kroki
+using Images
 
 mutable struct Task
   name::String
@@ -108,6 +109,23 @@ function generate_plantuml(title, tasks)
   return plantuml
 end
 
+"""
+    generate_gantt(todo_file="todo.md"; output_file="gantt.png")
+
+Generate a Gantt chart for the task list in the specified markdown file.
+
+# Arguments
+- `todo_file::String`: The markdown file containing the task list. Each task should have a name, start date, duration, and completion percentage. Default is "todo.md".
+- `output_file::String`: The name of the output file. The file will be saved in the format specified by the file extension. Default is "gantt.png".
+
+# Returns
+Nothing. The function saves the Gantt chart to the output file.
+
+# Example
+```julia
+generate_gantt("path/to/todo.md", output_file="gantt.png")
+```
+"""
 function generate_gantt(todo_file="todo.md"; output_file="gannt.png")
   title, tasks = parse_markdown(todo_file)
   plantuml = generate_plantuml(title, tasks)
@@ -115,6 +133,51 @@ function generate_gantt(todo_file="todo.md"; output_file="gannt.png")
   diagram = Kroki.Diagram(:PlantUML, plantuml)
   rendered = render(diagram, diagram_format)
   write(output_file, rendered)
+end
+
+"""
+    generate_gantt_for_dir(directory::String; output_file::String="gantt.png")
+
+Generate a Gantt chart for each markdown file in the specified directory and combine them into a single PNG image.
+
+# Arguments
+- `directory::String`: The directory to search for markdown files. Each markdown file should contain a task list that can be converted into a Gantt chart.
+- `output_file::String`: The name of the output file. The file will be saved in PNG format. Default is "gantt.png".
+
+# Returns
+Nothing. The function saves the combined Gantt chart to the output file.
+
+# Throws
+`ArgumentError` if the output file format is not PNG.
+
+# Example
+```julia
+generate_gantt_for_dir("path/to/directory", output_file="combined_gantt.png")
+```
+"""
+function generate_gantt_for_dir(directory::String; output_file::String="gantt.png")
+  diagram_format = splitext(output_file)[2][2:end]
+  diagram_format == "png" || throw(ArgumentError("Only png format is supported"))
+  md_files = filter(f -> endswith(f, ".md"), readdir(directory))
+  temp_dir = mktempdir()
+
+  try
+    images = []
+    for md_file in md_files
+      title, tasks = parse_markdown(joinpath(directory, md_file))
+      plantuml = generate_plantuml(title, tasks)
+      temp_file = joinpath(temp_dir, md_file * ".png")
+      diagram = Kroki.Diagram(:PlantUML, plantuml)
+      rendered = render(diagram, "png")
+      write(temp_file, rendered)
+      push!(images, load(temp_file))
+    end
+
+    combined_image = vcat(images...)
+    save(output_file, combined_image)
+  finally
+    rm(temp_dir, force=true, recursive=true)
+  end
 end
 
 end # module TaskTracker

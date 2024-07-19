@@ -5,4 +5,5 @@ version = "0.1.0"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 Kroki = "b3565e16-c1f2-4fe9-b4ab-221c88942068"
