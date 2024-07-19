@@ -65,6 +65,11 @@ function parse_markdown(filename)
       if startswith(strip(line), "- [ ]") || startswith(strip(line), "- [x]")
         level = count(c -> c == ' ', line[1:findfirst(c -> c != ' ', line)-1]) ÷ 2
 
+        while length(task_stack) > level
+          calculate_completion!(task_stack[end])  # Update the completion of the parent task
+          pop!(task_stack)
+        end
+
         new_task = process_task(line, level)
 
         push!(task_stack, new_task)
