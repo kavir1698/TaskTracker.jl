@@ -1,0 +1,8 @@
+name = "TaskTracker"
+uuid = "276ea756-d406-4871-8eef-b56d7ca98e29"
+authors = ["Farhad Vahdati "]
+version = "0.1.0"
+
+[deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Kroki = "b3565e16-c1f2-4fe9-b4ab-221c88942068"

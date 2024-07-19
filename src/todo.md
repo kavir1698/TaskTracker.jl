@@ -1,0 +1,23 @@
+# Project Tasks
+
+- [ ] Design phase | 2024-07-15 | 10
+  - [ ] Research
+    - [x] Competitor analysis
+    - [ ] User surveys
+  - [ ] Wireframing
+    - [x] Homepage
+    - [ ] Product page
+  - [x] Style guide
+- [ ] Development | 2024-07-25 | 20
+  - [ ] Frontend
+    - [x] Setup project
+    - [ ] Implement designs
+      - [x] Homepage
+      - [ ] Product page
+  - [ ] Backend
+    - [x] Database design
+    - [ ] API development
+- [ ] Testing | 2024-08-14 | 7
+  - [x] Unit tests
+  - [ ] Integration tests
+  - [ ] User acceptance testing
