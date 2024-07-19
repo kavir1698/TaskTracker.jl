@@ -1,5 +1,7 @@
 module TaskTracker
 
+export generate_gantt
+
 using Dates
 using Kroki
 

@@ -13,7 +13,7 @@ To use TaskTracker, follow these steps:
    - Tasks start with `- [ ]` or `- [x]` for incomplete or complete tasks, respectively.
    - Tasks can have subtasks indented with two spaces.
    - Tasks can have a start date and duration in days specified in the format `Task name | yyyy-mm-dd | duration`.
-3. Run `julia -e 'using TaskTracker; TaskTracker.generate_gantt("todo.md"; output_file="gannt.png")'` in the terminal, replacing `todo.md` with your todo file name if necessary.
+3. Run `julia -e 'using TaskTracker; generate_gantt("todo.md"; output_file="gannt.png")'` in the terminal, replacing `todo.md` with your todo file name if necessary.
 4. A Gantt chart will be generated as `gantt.png` in the same directory.
 
 Example Todo File
