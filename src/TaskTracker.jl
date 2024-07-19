@@ -201,8 +201,13 @@ function generate_gantt_for_dir(directory::String; output_file::String="gantt.pn
       write(temp_file, rendered)
       push!(images, load(temp_file))
     end
+    # Determine the maximum width among all images
+    max_width = maximum(width(img) for img in images)
 
-    combined_image = vcat(images...)
+    # Pad all images to the maximum width
+    padded_images = [cat(img, fill(RGB(1, 1, 1), height(img), max_width - width(img)), dims=2) for img in images]
+
+    combined_image = vcat(padded_images...)
     save(output_file, combined_image)
   finally
     rm(temp_dir, force=true, recursive=true)
