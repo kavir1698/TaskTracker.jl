@@ -30,6 +30,7 @@ end
 function parse_markdown(filename)
   tasks = Task[]
   task_stack = Task[]
+  title = ""
 
   function process_task(line, level)
     is_complete = startswith(strip(line), "- [x]")
@@ -62,7 +63,9 @@ function parse_markdown(filename)
 
   open(filename, "r") do file
     for line in eachline(file)
-      if startswith(strip(line), "- [ ]") || startswith(strip(line), "- [x]")
+      if startswith(strip(line), "# ")
+        title = strip(line)[3:end]
+      elseif startswith(strip(line), "- [ ]") || startswith(strip(line), "- [x]")
         level = count(c -> c == ' ', line[1:findfirst(c -> c != ' ', line)-1]) ÷ 2
 
         while length(task_stack) > level
@@ -81,12 +84,13 @@ function parse_markdown(filename)
     task.completion = calculate_completion!(task)
   end
 
-  return tasks
+  return title, tasks
 end
 
-function generate_plantuml(tasks)
+function generate_plantuml(title, tasks)
   plantuml = """
   @startgantt
+  title $title
   printscale daily
   project starts 2024-07-01
   saturday are closed
@@ -105,8 +109,8 @@ function generate_plantuml(tasks)
 end
 
 function generate_gantt(todo_file="todo.md"; output_file="gannt.png")
-  tasks = parse_markdown(todo_file)
-  plantuml = generate_plantuml(tasks)
+  title, tasks = parse_markdown(todo_file)
+  plantuml = generate_plantuml(title, tasks)
   diagram_format = splitext(output_file)[2][2:end]
   diagram = Kroki.Diagram(:PlantUML, plantuml)
   rendered = render(diagram, diagram_format)
