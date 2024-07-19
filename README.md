@@ -8,7 +8,7 @@ Usage
 
 To use TaskTracker, follow these steps:
 
-1. Install the package.
+1. Install the package by typing `]add https://github.com/kavir1698/TaskTracker.jl` in Julia.
 2. Create a todo file in markdown format (e.g., `todo.md`) with the following syntax:
    - Tasks start with `- [ ]` or `- [x]` for incomplete or complete tasks, respectively.
    - Tasks can have subtasks indented with two spaces.
