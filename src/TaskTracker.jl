@@ -32,6 +32,7 @@ function parse_markdown(filename)
   tasks = Task[]
   task_stack = Task[]
   title = ""
+  base_indentation = nothing
 
   function process_task(line, level)
     is_complete = startswith(strip(line), "- [x]")
@@ -69,12 +70,41 @@ function parse_markdown(filename)
     return new_task
   end
 
+  function calculate_indentation_level(line::String)
+    # Find the index of the first non-space character
+    first_non_space = findfirst(!isspace, line)
+
+    if isnothing(first_non_space)
+      return 0  # Line is empty or contains only whitespace
+    end
+
+    # Count the number of spaces before the first non-space character
+    spaces_count = first_non_space - 1
+
+    # Initialize base_indentation as nothing if it doesn't exist
+    if !@isdefined(base_indentation)
+      global base_indentation = nothing
+    end
+
+    # If it's the first subtask (spaces_count > 0), set it as the base indentation
+    if isnothing(base_indentation) && spaces_count > 0
+      global base_indentation = spaces_count
+    end
+
+    # Calculate the level
+    if isnothing(base_indentation) || base_indentation == 0
+      return spaces_count > 0 ? 1 : 0  # If no base, assume level 1 for any indentation
+    else
+      return spaces_count ÷ base_indentation
+    end
+  end
+
   open(filename, "r") do file
     for line in eachline(file)
       if startswith(strip(line), "# ")
         title = strip(line)[3:end]
       elseif startswith(strip(line), "- [ ]") || startswith(strip(line), "- [x]")
-        level = count(c -> c == ' ', line[1:findfirst(c -> c != ' ', line)-1]) ÷ 2
+        level = calculate_indentation_level(line)
 
         while length(task_stack) > level
           calculate_completion!(task_stack[end])  # Update the completion of the parent task
