@@ -11,7 +11,7 @@ mutable struct Task
   complete::Bool
   subtasks::Vector{Task}
   level::Int
-  start_date::Union{Date,Nothing}
+  start_date::Union{Date,Nothing,String}
   duration::Int
   completion::Float64
 end
@@ -48,11 +48,7 @@ function parse_markdown(filename)
         if startswith(date_str, "after ")
           # Handle "after Task" syntax
           referenced_task_name = strip(date_str[6:end])
-          referenced_task_index = findfirst(t -> !isnothing(t) && t.name == referenced_task_name, tasks)
-          if !isnothing(referenced_task_index)
-            referenced_task = tasks[referenced_task_index]
-            start_date = referenced_task.start_date + Day(referenced_task.duration)
-          end
+          start_date = "after $referenced_task_name"
         else
           start_date = Date(date_str, "yyyy-mm-dd")
         end
@@ -125,8 +121,8 @@ function generate_plantuml(title, tasks)
   for task in tasks
     plantuml *= "[$(task.name)] as [$(task.name)] lasts $(task.duration) days\n"
     plantuml *= "[$(task.name)] is $(round(Int, task.completion * 100))% complete\n"
-    if !isnothing(task.start_date) && typeof(task.start_date) == String && startswith(task.start_date, "after ")
-      referenced_task_name = strip(task.start_date)[6:end]
+    if !isnothing(task.start_date) && typeof(task.start_date) == String && startswith(strip(task.start_date), "after ")
+      referenced_task_name = strip(task.start_date)[7:end]
       plantuml *= "[$(task.name)] starts at [$(referenced_task_name)]'s end\n"
     else
       start_date = isnothing(task.start_date) ? project_start_date : Dates.format(task.start_date, "yyyy-mm-dd")
