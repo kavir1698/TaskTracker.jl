@@ -19,6 +19,8 @@ Install the package by typing `]add https://github.com/kavir1698/TaskTracker.jl`
 
 ### Creating a Todo file
 
+![A Gantt chart created from todo.md](example/gantt.svg)
+
 Create a todo file in markdown format (e.g., `todo.md`) with the following syntax:
 
 - Tasks start with `- [ ] ` or `- [x] ` for incomplete or complete tasks, respectively.
