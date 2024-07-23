@@ -33,6 +33,7 @@ function parse_markdown(filename)
   task_stack = Task[]
   title = ""
   base_indentation = nothing
+  project_start_date = nothing
 
   function process_task(line, level)
     is_complete = startswith(strip(line), "- [x]")
@@ -103,6 +104,11 @@ function parse_markdown(filename)
     for line in eachline(file)
       if startswith(strip(line), "# ")
         title = strip(line)[3:end]
+      elseif startswith(strip(line), "#project start date: ")
+        if occursin(r"#project start date: (\d{1,4}-\d{1,2}-\d{1,2})", strip(line))
+          project_start_date_match = match(r"#project start date: (\d{1,4}-\d{1,2}-\d{1,2})", strip(line))
+          project_start_date = project_start_date_match.captures[1]
+        end
       elseif startswith(strip(line), "- [ ]") || startswith(strip(line), "- [x]")
         level = calculate_indentation_level(line)
 
@@ -122,13 +128,13 @@ function parse_markdown(filename)
     task.completion = calculate_completion!(task)
   end
 
-  return title, tasks
+  return title, tasks, project_start_date
 end
 
-function generate_plantuml(title, tasks)
+function generate_plantuml(title, tasks; project_start_date=nothing)
   # Find the earliest start date among the tasks
   start_dates = [task.start_date for task in tasks if !isnothing(task.start_date) && typeof(task.start_date) != String]
-  project_start_date = isempty(start_dates) ? Dates.today() : Dates.format(minimum(start_dates), "yyyy-mm-dd")
+  project_start_date = isnothing(project_start_date) ? (isempty(start_dates) ? Dates.today() : Dates.format(minimum(start_dates), "yyyy-mm-dd")) : project_start_date
 
   plantuml = """
   @startgantt
@@ -181,9 +187,9 @@ Nothing. The function saves the Gantt chart to the output file.
 generate_gantt("path/to/todo.md", output_file="gantt.png")
 ```
 """
-function generate_gantt(todo_file="todo.md"; output_file="gannt.png")
-  title, tasks = parse_markdown(todo_file)
-  plantuml = generate_plantuml(title, tasks)
+function generate_gantt(todo_file="todo.md"; output_file="gantt.png")
+  title, tasks, project_start_date = parse_markdown(todo_file)
+  plantuml = generate_plantuml(title, tasks; project_start_date=project_start_date)
   diagram_format = splitext(output_file)[2][2:end]
   diagram = Kroki.Diagram(:PlantUML, plantuml)
   rendered = render(diagram, diagram_format)
@@ -219,8 +225,8 @@ function generate_gantt_for_dir(directory::String; output_file::String="gantt.pn
   try
     images = []
     for md_file in md_files
-      title, tasks = parse_markdown(joinpath(directory, md_file))
-      plantuml = generate_plantuml(title, tasks)
+      title, tasks, project_start_date = parse_markdown(joinpath(directory, md_file))
+      plantuml = generate_plantuml(title, tasks; project_start_date=project_start_date)
       temp_file = joinpath(temp_dir, md_file * ".png")
       diagram = Kroki.Diagram(:PlantUML, plantuml)
       rendered = render(diagram, "png")
